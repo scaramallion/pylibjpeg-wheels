@@ -24,6 +24,7 @@ before_install:
     - pwd
     - cd ../
     - git clone --recurse-submodules https://github.com/pydicom/pylibjpeg
+    - cd pylibjpeg
 
 install:
     - python3 -m pip install cibuildwheel==1.1.0
