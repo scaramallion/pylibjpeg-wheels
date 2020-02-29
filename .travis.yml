@@ -20,7 +20,10 @@ env:
         # TWINE_PASSWORD is set in Travis settings
 
 before_install:
-    - git clone --recurse_submodules https://github.com/pydicom/pylibjpeg
+    - ls
+    - pwd
+    - cd ../
+    - git clone --recurse-submodules https://github.com/pydicom/pylibjpeg
 
 install:
     - python3 -m pip install cibuildwheel==1.1.10
