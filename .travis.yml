@@ -18,6 +18,9 @@ env:
     global:
         - TWINE_USERNAME=__token__
         # TWINE_PASSWORD is set in Travis settings
+        - CIBW_BUILD: cp36-*
+        - CIBW_BUILD: cp37-*
+        - CIBW_BUILD: cp38-*
 
 before_install:
     - ls
