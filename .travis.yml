@@ -1,45 +1,63 @@
+branches:
+    only:
+        - "master"
+
 language: python
 
 jobs:
     include:
-        # Linux
+        # Linux - working
         - services: docker
-        # OSX
+          name: Linux
+          python: "3.8"
+          env: PYEXE=python3
+        # ARMv8
+        #- services: docker
+        #  arch: aarch64
+        #  python: "3.8"
+        #  env: PYEXE=python3
+        # PPC64LE
+        #- services: docker
+        #  arch: ppc641le
+        #  python: "3.8"
+        #  env: PYEXE=python3
+        # OSX - working
         - os: osx
+          name: OSX
           language: shell
+          python: "3.8"
+          env: PYEXE=python3
         # Windows
         - os: windows
+          name: Windows
           language: shell
+          env:
+            - PYEXE=/c/Python38/python
+            - LIB=/c/Python38/libs
           before_install:
-            - choco install python --version 3.8.0
+            # We're going to use MSVC VisualStudio 2017's build tools
+            - choco install python --version 3.8
             - export PATH="/c/Python38:/c/Python38/Scripts:$PATH"
 
 env:
     global:
         - TWINE_USERNAME=__token__
-        # TWINE_PASSWORD is set in Travis settings
-        - CIBW_BUILD: cp36-*
-        - CIBW_BUILD: cp37-*
-        - CIBW_BUILD: cp38-*
-
-before_install:
-    - ls
-    - pwd
-    - cd ../
-    - git clone --recurse-submodules https://github.com/pydicom/pylibjpeg
-    - cd pylibjpeg
+        # TWINE_PASSWORD is set to PyPI API token in Travis settings
+        - CIBW_BUILD="cp36-* cp37-* cp38-*"
+        - secure: "pE3d31HVRCKPuY9Vs6ob8LuQh6sxTMP+IcPHg3nApuciRsG8LG8G/2Pbh6aKCFe9n/WxEx3KMXyRkOJMqw6O0cW7I+EN7X2V38hb82Gog2Qr5Ia/5RWEEAQRqztv3Zbedy2wBNoXEAEltAxKiz4Okl5ssStHJ+vGgMM5nieGKwwg2kYbY9c5Rx6QD2+CKkbvd2B4UEt3W87fSaqC8C0Xdcwdi0yXnASMXSU924Q31vZ/05RdNCKB/Bot5WjVGVLGidCwJdJY8DBDO2gX1Wn9GIp1k258aDetC/N4fKMm+Tsmq6BunbsAyicxN30lSvFrhNi6N2p5RAMEQIcBP0jo/OjOls25g5q7rWvPpWvbe6VCq71AVYVohkoZcuZ3IrtZmQT/fB689DR5Ktukg6l1jlCHILVbMmYoe0qRAs74U2XsIqat/hKvpI4sNybdjMaNtruO8Re+XsE6+Edo3NUYVQ6gfLXQBvnXndlA5f6segPKQIcEljQIERXgLA3VFkN50/Brn3H2qskeaebrv/QSCbcUngL8Z3QMIAk5jlneuRLMoQRue4ICSwnt6Lvdl2Xfxu2r/w0m2xbeggUndaJ7N00OiHs1X3aPttqTk3c9VLhNmdeg48RrEgWv23VMyEkIU0pOziN3rUVc1d1BkhFcsFrXju/Y+fUF52dxiaPQIyE="
 
 install:
-    - python3 -m pip install cibuildwheel==1.1.0
+    - $PYEXE -m pip install cibuildwheel==1.1.0
+    - cd ../
+    - git clone --recurse-submodules https://github.com/pydicom/pylibjpeg-libjpeg
+    - cd pylibjpeg-libjpeg
+    - $PYEXE -m pip install cython numpy
+    - $PYEXE -m pip install .
 
 script:
-    - python3 -m cibuildwheel --output-dir wheelhouse
+    - $PYEXE -m cibuildwheel --output-dir wheelhouse
 
 after_success:
     - ls wheelhouse
-    # If the release was tagged, upload to PyPI
-    #- |
-    #    if [[ $TRAVIS_TAG ]]; then
-    #        python3 -m pip install twine
-    #        python3 -m twine upload wheelhouse/*.whl
-    #    fi
+    #- $PYEXE -m pip install twine
+    #- $PYEXE -m twine upload --repository-url https://test.pypi.org/legacy/ wheelhouse/*.whl
